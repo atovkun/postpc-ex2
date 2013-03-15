@@ -25,6 +25,8 @@ public class TodoListManagerActivity extends Activity {
 		setContentView(R.layout.activity_todo_list_manager);
 		list = (ListView) findViewById(R.id.lstTodoItems);
 		list.setAdapter(adapter);
+		EditText newItem = (EditText) findViewById(R.id.edtNewItem);
+		newItem.setText("");
 	}
 
 	@Override
