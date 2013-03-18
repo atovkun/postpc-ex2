@@ -5,18 +5,7 @@
     android:orientation="vertical"
     tools:context=".TodoListManagerActivity" >
 
-    <EditText
-        android:id="@+id/edtNewItem"
-        android:layout_width="256dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginBottom="20dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/edittext"
-        android:ems="10" android:inputType="text">
-    </EditText>
+
 
     <ListView
         android:id="@+id/lstTodoItems"

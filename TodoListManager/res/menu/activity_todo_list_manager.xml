@@ -4,10 +4,10 @@
         android:id="@+id/menuItemAdd"
         android:title="@string/menuItemAdd"
           android:icon="@drawable/add"/>
-      <item
+      <!-- <item
         android:id="@+id/menuItemDelete"
         android:title="@string/menuItemDelete"
          android:icon="@drawable/delete"
-        />
+        />-->
 
 </menu>
