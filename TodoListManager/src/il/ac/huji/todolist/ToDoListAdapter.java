@@ -19,8 +19,7 @@ public class ToDoListAdapter extends ArrayAdapter<Item> {
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		System.out.println("getview");
+	public View getView(int position, View convertView, ViewGroup parent) {	
 		Item item = (Item) getItem(position);
 		LayoutInflater inflater = LayoutInflater.from(getContext());
 		View view = inflater.inflate(R.layout.row_item, null);
@@ -32,6 +31,8 @@ public class ToDoListAdapter extends ArrayAdapter<Item> {
 		
 		if (dueDate == null) { 
 			date.setText("No due date");
+			date.setTextColor(Color.BLACK);
+			title.setTextColor(Color.BLACK);
 		} else {
 			DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 			date.setText(df.format(dueDate));
@@ -46,13 +47,6 @@ public class ToDoListAdapter extends ArrayAdapter<Item> {
 				
 			}
 		}
-		System.out.println("after change:"+title.getText()+"\n"+date.getText());
-		/*
-		 * txtName.setText(item); if(position%2==0)
-		 * txtName.setTextColor(Color.RED); else
-		 * txtName.setTextColor(Color.BLUE);
-		 */
-
 		return view;
 	}
 

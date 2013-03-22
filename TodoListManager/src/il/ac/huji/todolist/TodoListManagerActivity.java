@@ -11,6 +11,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -27,8 +28,10 @@ public class TodoListManagerActivity extends Activity {
 		adapter = new ToDoListAdapter(this);
 		setContentView(R.layout.activity_todo_list_manager);
 		list = (ListView) findViewById(R.id.lstTodoItems);
+		
 		list.setAdapter(adapter);
 		registerForContextMenu(list);
+		adapter.clear();
 
 	}
 
@@ -36,17 +39,18 @@ public class TodoListManagerActivity extends Activity {
 			ContextMenuInfo info) {
 		super.onCreateContextMenu(menu, v, info);
 		getMenuInflater().inflate(R.menu.context_menu, menu);
-		menu.setHeaderTitle(((TextView) v.findViewById(R.id.txtTodoTitle))
-				.getText());
-		TextView task = (TextView) v.findViewById(R.id.txtTodoTitle);
-		String taskTitle = (String) task.getText();
-		if (taskTitle.contains("Call ")) {
+		 AdapterContextMenuInfo infoAdapter =(AdapterContextMenuInfo) info;
+		String taskTitle = (adapter.getItem(infoAdapter.position)).getTitle();
+		menu.setHeaderTitle(taskTitle);
+		if (taskTitle.startsWith("Call ")) {
 			MenuItem call = (MenuItem) menu.findItem(R.id.menuItemCall);
 			call.setTitle(taskTitle);
-			call.setVisible(true);
-			call.setEnabled(true);
-
 		}
+		else{	
+			menu.removeItem(R.id.menuItemCall);
+			
+		}
+		//System.out.println("is exist??"+menu.findItem(R.id.menuItemCall));
 	}
 
 	@Override
@@ -61,7 +65,7 @@ public class TodoListManagerActivity extends Activity {
 
 		case R.id.menuItemCall:
 			String title = (String) item.getTitle();
-			String number = "tel:" + title.split("Call ")[1];
+			String number = title.split("Call ")[1];
 			Intent call = new Intent(Intent.ACTION_CALL, Uri.parse("tel:"
 					+ number));
 			startActivity(call);
@@ -82,12 +86,12 @@ public class TodoListManagerActivity extends Activity {
 
 		if (resCode == RESULT_OK && reqCode == 42) {
 			String title = data.getStringExtra("title");
-			Date dueDate = (Date) data.getSerializableExtra("dueDate");
-			System.out.println("title:" + title + " dueDate:"
-					+ dueDate.toString());
-
-			adapter.add(new Item(title, dueDate));
-
+			if (data.getSerializableExtra("dueDate") == null) {
+				adapter.add(new Item(title, null));
+			} else {
+				Date dueDate = (Date) data.getSerializableExtra("dueDate");
+				adapter.add(new Item(title, dueDate));
+			}
 		}
 	}
 
