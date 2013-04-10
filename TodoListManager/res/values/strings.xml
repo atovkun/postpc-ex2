@@ -8,6 +8,6 @@
       <string name="menuItemDelete">Delete</string>
         <string name="add_new_item_window">Add New Item</string>
          <string name="btnOKtext">OK</string>
-          <string name="btnCanceltext">Cancel</string>
-
+          <string name="btnCanceltext">Cancel</string> <string name="parseApplication">BVoWv7y3Z3JIk7YAoRfk5ih12DtzhhwRNXb81uVC</string>
+    <string name="clientKey">SwJ5rmNPjSZLhCLEPXyl6YJyCZX5MQFGelWXBDSQ</string>
 </resources>
