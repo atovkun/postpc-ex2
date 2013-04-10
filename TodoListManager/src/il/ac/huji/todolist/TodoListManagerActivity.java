@@ -1,9 +1,14 @@
 package il.ac.huji.todolist;
 
 import java.util.Date;
+import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -11,46 +16,88 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
+
+import com.parse.FindCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 public class TodoListManagerActivity extends Activity {
 
-	private ArrayAdapter<Item> adapter;
-	ListView list;
+	TodoDAL todoDAL;
+	// private ArrayAdapter<ITodoItem> adapter;
+	public SQLiteDatabase db;
+	private Cursor cursor;
+	private ListView list;
+	private ToDoListAdapter cursorAdapter;
+	private final String[] fields = { DBHelper.ID_COLUMN,
+
+	DBHelper.TITLE_COLUMN, DBHelper.DUE_COLUMN };
+	private final String[] from = new String[] { DBHelper.TITLE_COLUMN,
+			DBHelper.DUE_COLUMN };
+	private final int[] to = new int[] { R.id.txtTodoTitle, R.id.txtTodoDueDate };
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		todoDAL = new TodoDAL(this);
+		
+		db = todoDAL.getDB();
 		super.onCreate(savedInstanceState);
-		adapter = new ToDoListAdapter(this);
 		setContentView(R.layout.activity_todo_list_manager);
 		list = (ListView) findViewById(R.id.lstTodoItems);
-		
-		list.setAdapter(adapter);
+		setAdapter();
 		registerForContextMenu(list);
-		adapter.clear();
+		todoDAL.update(new Item("anna", new Date()));
+		List<ITodoItem> all = todoDAL.all();
+		for(ITodoItem item: all){
+			System.out.println("printing from all "+ item.getTitle()+" "+ item.getDueDate() );
+		}
+	}
 
+	@SuppressLint("NewApi")
+	private void setAdapter() {
+
+		cursor = db.query(DBHelper.TABLE_NAME, new String[] {
+				DBHelper.TITLE_COLUMN, DBHelper.DUE_COLUMN }, null, null, null,
+				null, null);
+
+		// FOR TESTING
+		if (cursor.moveToFirst()) {
+			do {
+				String title = cursor.getString(0);
+				long when = cursor.getLong(1);
+				Date whenDate = new Date(when);
+				System.out.println("title = " + title + ", dueDate = "
+						+ whenDate.toGMTString());
+			} while (cursor.moveToNext());
+		}
+		cursor = db.query(DBHelper.TABLE_NAME, fields, null, null, null, null,
+				null);
+		cursorAdapter = new ToDoListAdapter(this, R.layout.row_item, cursor,
+				from, to);
+		list.setAdapter(cursorAdapter);
 	}
 
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo info) {
 		super.onCreateContextMenu(menu, v, info);
 		getMenuInflater().inflate(R.menu.context_menu, menu);
-		 AdapterContextMenuInfo infoAdapter =(AdapterContextMenuInfo) info;
-		String taskTitle = (adapter.getItem(infoAdapter.position)).getTitle();
+		AdapterContextMenuInfo infoAdapter = (AdapterContextMenuInfo) info;
+		String taskTitle = (cursorAdapter.getItem(infoAdapter.position))
+				.getTitle();
 		menu.setHeaderTitle(taskTitle);
 		if (taskTitle.startsWith("Call ")) {
 			MenuItem call = (MenuItem) menu.findItem(R.id.menuItemCall);
 			call.setTitle(taskTitle);
-		}
-		else{	
+		} else {
 			menu.removeItem(R.id.menuItemCall);
-			
+
 		}
-		//System.out.println("is exist??"+menu.findItem(R.id.menuItemCall));
+
 	}
 
 	@Override
@@ -60,13 +107,16 @@ public class TodoListManagerActivity extends Activity {
 		int selectedItemIndex = info.position;
 		switch (item.getItemId()) {
 		case R.id.menuItemDelete:
-			adapter.remove(adapter.getItem(selectedItemIndex));
+			System.out.println("onContextItemSelected:" + selectedItemIndex);
+			this.todoDAL.delete(cursorAdapter.getItem(selectedItemIndex));
+			cursor.requery();
+			cursorAdapter.notifyDataSetChanged();
 			break;
 
 		case R.id.menuItemCall:
 			String title = (String) item.getTitle();
 			String number = title.split("Call ")[1];
-			Intent call = new Intent(Intent.ACTION_CALL, Uri.parse("tel:"
+			Intent call = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"
 					+ number));
 			startActivity(call);
 		}
@@ -81,17 +131,18 @@ public class TodoListManagerActivity extends Activity {
 		return true;
 	}
 
+	// @SuppressWarnings("deprecation")
 	@Override
 	protected void onActivityResult(int reqCode, int resCode, Intent data) {
 
 		if (resCode == RESULT_OK && reqCode == 42) {
 			String title = data.getStringExtra("title");
-			if (data.getSerializableExtra("dueDate") == null) {
-				adapter.add(new Item(title, null));
-			} else {
-				Date dueDate = (Date) data.getSerializableExtra("dueDate");
-				adapter.add(new Item(title, dueDate));
-			}
+			Date dueDate = (Date) data.getSerializableExtra("dueDate");
+			ITodoItem todoItem = new Item(title, dueDate);
+			this.todoDAL.insert(todoItem);
+			cursor.requery();
+			cursorAdapter.notifyDataSetChanged();
+
 		}
 	}
 
@@ -101,17 +152,9 @@ public class TodoListManagerActivity extends Activity {
 		case R.id.menuItemAdd:
 			Intent intent = new Intent(this, AddNewTodoItemActivity.class);
 			startActivityForResult(intent, 42);
-			/*
-			 * EditText newItem = (EditText) findViewById(R.id.edtNewItem); if
-			 * (newItem.getText().toString() != "") adapter.add(new
-			 * String(newItem.getText().toString())); newItem.setText("");
-			 */
+
 			break;
 		case R.id.menuItemDelete:
-			/*
-			 * if (list.getSelectedItemPosition() != -1) {
-			 * adapter.remove(list.getSelectedItem().toString()); } break;
-			 */
 		}
 		return true;
 	}

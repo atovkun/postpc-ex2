@@ -2,19 +2,22 @@ package il.ac.huji.todolist;
 
 import java.util.Date;
 
-public class Item {
-	String title;
-	Date dueDate;
+public class Item implements ITodoItem{
+	public String title;
+	public Date dueDate;
 	public Item(String title,Date dueDate){
 		this.title=title;
 		this.dueDate = dueDate;
 	}
-	
-	public String getTitle(){
+	@Override
+	public String getTitle() {
 		return title;
 	}
-	public Date getDate(){
+	@Override
+	public Date getDueDate() {
 		return dueDate;
 	}
+
+
 
 }
