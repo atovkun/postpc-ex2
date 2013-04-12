@@ -33,7 +33,6 @@ public class ToDoListAdapter extends SimpleCursorAdapter {
         
 	}
 	public ITodoItem getItem(int position){
-		System.out.println("in get item. position:"+position+" c count:"+c.getCount());
 		c.moveToPosition(position);
 		ITodoItem item = new Item(c.getString(1),new Date(c.getLong(2)));
 		return item;
@@ -43,26 +42,13 @@ public class ToDoListAdapter extends SimpleCursorAdapter {
 		 if(convertView == null)
 	            convertView = View.inflate(context, R.layout.row_item, null);
 	        View view = convertView;
-	        System.out.println("in get view position :"+position);
 	        c.moveToPosition(position);
 
 	        TextView title = (TextView) convertView.findViewById(R.id.txtTodoTitle);
 	        TextView date = (TextView) convertView.findViewById(R.id.txtTodoDueDate);
 	        Date dueDate = new Date (c.getLong(2));
 	        title.setText(c.getString(1));
-	        //System.out.println("title:"+c.getString(1)+ " duedate:"+dueDate);
-	      //  dueDate.setText(convertedDate.);
-	        
-	     
-	/*	Item item = (Item) getItem(position);
-		LayoutInflater inflater = LayoutInflater.from(getContext());
-		View view = inflater.inflate(R.layout.row_item, null);
-		TextView title = (TextView) view.findViewById(R.id.txtTodoTitle);
-		String titleText = item.getTitle();
-		title.setText(titleText);
-		TextView date = (TextView) view.findViewById(R.id.txtTodoDueDate);
-		Date dueDate = new Date(item.getDate());
-		*/
+
 		if (c.getLong(1) == -1) { 
 			date.setText("No due date");
 			date.setTextColor(Color.BLACK);

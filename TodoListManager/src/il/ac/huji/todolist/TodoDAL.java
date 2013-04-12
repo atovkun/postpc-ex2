@@ -20,7 +20,6 @@ public class TodoDAL {
 	public SQLiteDatabase db;
 	private Context context;
 	private Cursor cursor;
-	private ToDoListAdapter adapter;
 	public long time;
 
 	public TodoDAL(Context context) {
@@ -32,15 +31,10 @@ public class TodoDAL {
 
 		helper = new DBHelper(context);
 		db = helper.getWritableDatabase();
-		adapter = null;
 	}
 
 	public SQLiteDatabase getDB() {
 		return db;
-	}
-
-	public void setAdapter(ToDoListAdapter adapter) {
-		this.adapter = adapter;
 	}
 
 	public boolean insert(ITodoItem todoItem) {
@@ -70,13 +64,13 @@ public class TodoDAL {
 	}
 
 	public boolean update(ITodoItem todoItem) {
-		System.out.println("in update:"+todoItem.getTitle()+" "+todoItem.getDueDate());
-		if(updateItemFromDB(todoItem)){
-		updateItemFromParse(todoItem);
-		return true;
+	//	System.out.println("in update:" + todoItem.getTitle() + " "
+	//			+ todoItem.getDueDate());
+		if (updateItemFromDB(todoItem)) {
+			updateItemFromParse(todoItem);
+			return true;
 		}
 		return false;
-		
 
 	}
 
@@ -86,22 +80,20 @@ public class TodoDAL {
 	}
 
 	private void updateItemFromParse(ITodoItem todoItem) {
-		System.out.println("in updateItemFromParse:"+todoItem.getTitle()+" "+todoItem.getDueDate());
+		//System.out.println("in updateItemFromParse:" + todoItem.getTitle()
+		//		+ " " + todoItem.getDueDate());
+		time = todoItem.getDueDate().getTime();
 		ParseQuery query = new ParseQuery("todo");
 		query.whereEqualTo("title", todoItem.getTitle());
-		time = todoItem.getDueDate().getTime();
 		query.findInBackground(new FindCallback() {
 			public void done(List<ParseObject> matches, ParseException e) {
-				if (e != null) {
-
-					for (ParseObject obj : matches) {
-						System.out.println("FOUND MATCH: updating date to:"+ new Date (time));
-						obj.put("due", time);
-						obj.put("cheatMode", true);
-						obj.saveInBackground();
+				if (e == null) {
+					for (int i = 0; i < matches.size(); i++) {
+						ParseObject updated=(matches.get(i));
+						updated.put("due", time);
+						updated.put("cheatMode", true);
+						updated.saveInBackground();
 					}
-				} else {
-
 				}
 			}
 		});
@@ -112,25 +104,16 @@ public class TodoDAL {
 
 		ParseQuery query = new ParseQuery("todo");
 		query.whereEqualTo("title", todoItem.getTitle());
-		System.out.println("In deleteItemFromParse: item - "
-				+ todoItem.getTitle() + " due - "
-				+ todoItem.getDueDate().getTime());
 		query.whereEqualTo("due", todoItem.getDueDate().getTime());
 		query.findInBackground(new FindCallback() {
 			public void done(List<ParseObject> matches, ParseException e) {
-				System.out.println("DONE:" + matches.size());
-				if (e != null) {
-					for (ParseObject obj : matches) {
-						System.out.println("found:"+obj.getString("title"));
-						obj.deleteInBackground();
-
+				if (e == null) {
+					for (int i = 0; i < matches.size(); i++) {
+						(matches.get(i)).deleteInBackground();
 					}
-				} else {
-					System.err.println("error:" + e);
 				}
 			}
 		});
-
 	}
 
 	private boolean updateItemFromDB(ITodoItem todoItem) {
@@ -159,14 +142,16 @@ public class TodoDAL {
 
 	public List<ITodoItem> all() {
 		List<ITodoItem> all = new ArrayList<ITodoItem>();
-		Cursor allCursor = db.query(DBHelper.TABLE_NAME, new String[] { "*" },
-				null, null, null, null, null);
-		if (allCursor.moveToFirst()) {
+		cursor = db.query(DBHelper.TABLE_NAME, new String[] {
+				DBHelper.TITLE_COLUMN, DBHelper.DUE_COLUMN }, null, null, null,
+				null, null);
+
+		if (cursor.moveToFirst()) {
 			do {
-				ITodoItem item = new Item(allCursor.getString(1), new Date(
-						allCursor.getLong(2)));
-				all.add(item);
-			} while (allCursor.moveToNext());
+				all.add(new Item(cursor.getString(0), new Date(cursor
+						.getLong(1))));
+
+			} while (cursor.moveToNext());
 		}
 		return all;
 	}

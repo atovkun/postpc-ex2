@@ -51,30 +51,12 @@ public class TodoListManagerActivity extends Activity {
 		list = (ListView) findViewById(R.id.lstTodoItems);
 		setAdapter();
 		registerForContextMenu(list);
-		todoDAL.update(new Item("anna", new Date()));
-		List<ITodoItem> all = todoDAL.all();
-		for(ITodoItem item: all){
-			System.out.println("printing from all "+ item.getTitle()+" "+ item.getDueDate() );
-		}
 	}
 
 	@SuppressLint("NewApi")
 	private void setAdapter() {
 
-		cursor = db.query(DBHelper.TABLE_NAME, new String[] {
-				DBHelper.TITLE_COLUMN, DBHelper.DUE_COLUMN }, null, null, null,
-				null, null);
-
-		// FOR TESTING
-		if (cursor.moveToFirst()) {
-			do {
-				String title = cursor.getString(0);
-				long when = cursor.getLong(1);
-				Date whenDate = new Date(when);
-				System.out.println("title = " + title + ", dueDate = "
-						+ whenDate.toGMTString());
-			} while (cursor.moveToNext());
-		}
+		
 		cursor = db.query(DBHelper.TABLE_NAME, fields, null, null, null, null,
 				null);
 		cursorAdapter = new ToDoListAdapter(this, R.layout.row_item, cursor,
@@ -107,10 +89,14 @@ public class TodoListManagerActivity extends Activity {
 		int selectedItemIndex = info.position;
 		switch (item.getItemId()) {
 		case R.id.menuItemDelete:
-			System.out.println("onContextItemSelected:" + selectedItemIndex);
 			this.todoDAL.delete(cursorAdapter.getItem(selectedItemIndex));
 			cursor.requery();
 			cursorAdapter.notifyDataSetChanged();
+			//TESTING
+			/*List<ITodoItem> all = todoDAL.all();
+			for(ITodoItem item3: all){
+				System.out.println("printing after delete "+ item3.getTitle()+" "+ item3.getDueDate() );
+			}*/
 			break;
 
 		case R.id.menuItemCall:
@@ -142,7 +128,18 @@ public class TodoListManagerActivity extends Activity {
 			this.todoDAL.insert(todoItem);
 			cursor.requery();
 			cursorAdapter.notifyDataSetChanged();
-
+			//TESTING
+			/*List<ITodoItem> all = todoDAL.all();
+			for(ITodoItem item3: all){
+				System.out.println("printing after add "+ item3.getTitle()+" "+ item3.getDueDate() +" "+item3.getDueDate().getTime() );
+			}
+			this.todoDAL.update(new Item(title,new Date()));
+			
+			all = todoDAL.all();
+			for(ITodoItem item3: all){
+				System.out.println("printing after update "+ item3.getTitle()+" "+ item3.getDueDate() +" "+item3.getDueDate().getTime() );
+			}
+			cursor.requery();*/
 		}
 	}
 
