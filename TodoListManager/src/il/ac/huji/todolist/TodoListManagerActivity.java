@@ -29,7 +29,6 @@ import com.parse.ParseQuery;
 public class TodoListManagerActivity extends Activity {
 
 	TodoDAL todoDAL;
-	// private ArrayAdapter<ITodoItem> adapter;
 	public SQLiteDatabase db;
 	private Cursor cursor;
 	private ListView list;
@@ -92,11 +91,6 @@ public class TodoListManagerActivity extends Activity {
 			this.todoDAL.delete(cursorAdapter.getItem(selectedItemIndex));
 			cursor.requery();
 			cursorAdapter.notifyDataSetChanged();
-			//TESTING
-			/*List<ITodoItem> all = todoDAL.all();
-			for(ITodoItem item3: all){
-				System.out.println("printing after delete "+ item3.getTitle()+" "+ item3.getDueDate() );
-			}*/
 			break;
 
 		case R.id.menuItemCall:
@@ -117,7 +111,6 @@ public class TodoListManagerActivity extends Activity {
 		return true;
 	}
 
-	// @SuppressWarnings("deprecation")
 	@Override
 	protected void onActivityResult(int reqCode, int resCode, Intent data) {
 
@@ -128,18 +121,6 @@ public class TodoListManagerActivity extends Activity {
 			this.todoDAL.insert(todoItem);
 			cursor.requery();
 			cursorAdapter.notifyDataSetChanged();
-			//TESTING
-			/*List<ITodoItem> all = todoDAL.all();
-			for(ITodoItem item3: all){
-				System.out.println("printing after add "+ item3.getTitle()+" "+ item3.getDueDate() +" "+item3.getDueDate().getTime() );
-			}
-			this.todoDAL.update(new Item(title,new Date()));
-			
-			all = todoDAL.all();
-			for(ITodoItem item3: all){
-				System.out.println("printing after update "+ item3.getTitle()+" "+ item3.getDueDate() +" "+item3.getDueDate().getTime() );
-			}
-			cursor.requery();*/
 		}
 	}
 

@@ -11,9 +11,12 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.parse.FindCallback;
 import com.parse.Parse;
+import com.parse.ParseACL;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
+
 
 public class TodoDAL {
 	private DBHelper helper;
@@ -21,6 +24,7 @@ public class TodoDAL {
 	private Context context;
 	private Cursor cursor;
 	public long time;
+	
 
 	public TodoDAL(Context context) {
 		this.context = context;
@@ -28,7 +32,9 @@ public class TodoDAL {
 		Parse.initialize(context,
 				context.getResources().getString(R.string.parseApplication),
 				context.getResources().getString(R.string.clientKey));
-
+		ParseUser.enableAutomaticUser();
+		ParseACL defaultACL = new ParseACL();
+		ParseACL.setDefaultACL(defaultACL, true);
 		helper = new DBHelper(context);
 		db = helper.getWritableDatabase();
 	}
@@ -56,16 +62,17 @@ public class TodoDAL {
 	}
 
 	private void insertParse(ITodoItem todoItem) {
-		ParseObject student = new ParseObject("todo");
-		student.put("title", todoItem.getTitle());
-		student.put("due", todoItem.getDueDate().getTime());
-		student.saveInBackground();
+		ParseObject item = new ParseObject("todo");
+		item.put("title", todoItem.getTitle());
+		item.put("due", todoItem.getDueDate().getTime());
+		item.put("user", ParseUser.getCurrentUser());
+		item.setACL(new ParseACL(ParseUser.getCurrentUser()));
+		item.saveInBackground();
 
 	}
 
 	public boolean update(ITodoItem todoItem) {
-	//	System.out.println("in update:" + todoItem.getTitle() + " "
-	//			+ todoItem.getDueDate());
+
 		if (updateItemFromDB(todoItem)) {
 			updateItemFromParse(todoItem);
 			return true;
@@ -80,8 +87,7 @@ public class TodoDAL {
 	}
 
 	private void updateItemFromParse(ITodoItem todoItem) {
-		//System.out.println("in updateItemFromParse:" + todoItem.getTitle()
-		//		+ " " + todoItem.getDueDate());
+
 		time = todoItem.getDueDate().getTime();
 		ParseQuery query = new ParseQuery("todo");
 		query.whereEqualTo("title", todoItem.getTitle());
