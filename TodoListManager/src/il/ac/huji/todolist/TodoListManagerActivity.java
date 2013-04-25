@@ -1,11 +1,10 @@
 package il.ac.huji.todolist;
 
 import java.util.Date;
-import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentValues;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -17,50 +16,58 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
-
-import com.parse.FindCallback;
-import com.parse.Parse;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
+import android.widget.TableLayout;
 
 public class TodoListManagerActivity extends Activity {
 
 	TodoDAL todoDAL;
 	public SQLiteDatabase db;
-	private Cursor cursor;
+	public Cursor cursor;
 	private ListView list;
-	private ToDoListAdapter cursorAdapter;
+	public ToDoListAdapter cursorAdapter;
 	private final String[] fields = { DBHelper.ID_COLUMN,
-
-	DBHelper.TITLE_COLUMN, DBHelper.DUE_COLUMN };
+			DBHelper.TITLE_COLUMN, DBHelper.DUE_COLUMN };
 	private final String[] from = new String[] { DBHelper.TITLE_COLUMN,
 			DBHelper.DUE_COLUMN };
 	private final int[] to = new int[] { R.id.txtTodoTitle, R.id.txtTodoDueDate };
+	private TwitterHelper twitterHelper;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		todoDAL = new TodoDAL(this);
-		
 		db = todoDAL.getDB();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_todo_list_manager);
 		list = (ListView) findViewById(R.id.lstTodoItems);
 		setAdapter();
 		registerForContextMenu(list);
+
 	}
 
-	@SuppressLint("NewApi")
+	public Cursor getCursor() {
+
+		return this.cursor;
+	}
+
+	// Executes twitter updates.
+	@Override
+	protected void onStart() {
+
+		super.onStart();
+		twitterHelper = new TwitterHelper(todoDAL, this);
+		twitterHelper.execute();
+	}
+
 	private void setAdapter() {
 
-		
 		cursor = db.query(DBHelper.TABLE_NAME, fields, null, null, null, null,
 				null);
 		cursorAdapter = new ToDoListAdapter(this, R.layout.row_item, cursor,
 				from, to);
 		list.setAdapter(cursorAdapter);
+
 	}
 
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -92,7 +99,6 @@ public class TodoListManagerActivity extends Activity {
 			cursor.requery();
 			cursorAdapter.notifyDataSetChanged();
 			break;
-
 		case R.id.menuItemCall:
 			String title = (String) item.getTitle();
 			String number = title.split("Call ")[1];
@@ -106,7 +112,7 @@ public class TodoListManagerActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.activity_todo_list_manager, menu);
+		getMenuInflater().inflate(R.menu.todo_list_manager, menu);
 
 		return true;
 	}
@@ -117,7 +123,7 @@ public class TodoListManagerActivity extends Activity {
 		if (resCode == RESULT_OK && reqCode == 42) {
 			String title = data.getStringExtra("title");
 			Date dueDate = (Date) data.getSerializableExtra("dueDate");
-			ITodoItem todoItem = new Item(title, dueDate);
+			ITodoItem todoItem = new TodoItem(title, dueDate);
 			this.todoDAL.insert(todoItem);
 			cursor.requery();
 			cursorAdapter.notifyDataSetChanged();
@@ -132,7 +138,9 @@ public class TodoListManagerActivity extends Activity {
 			startActivityForResult(intent, 42);
 
 			break;
-		case R.id.menuItemDelete:
+		case R.id.menuItemShowPref:
+			Intent prefIntent = new Intent(this, PrefsActivity.class);
+			startActivity(prefIntent);
 		}
 		return true;
 	}

@@ -15,8 +15,7 @@ import android.view.ViewGroup;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-//public class ToDoListAdapter extends ArrayAdapter<Item> {
-@SuppressLint("NewApi")
+
 public class ToDoListAdapter extends SimpleCursorAdapter {
 	Cursor c;
 	Context context;
@@ -24,7 +23,6 @@ public class ToDoListAdapter extends SimpleCursorAdapter {
 
 	public ToDoListAdapter(Context context, int layout, Cursor c,
 			String[] from, int[] to) {
-		// super(context, android.R.layout.simple_list_item_1);
 		super(context, R.layout.row_item, c, from, to,0);
         this.c = c;
         this.context=context;
@@ -34,7 +32,7 @@ public class ToDoListAdapter extends SimpleCursorAdapter {
 	}
 	public ITodoItem getItem(int position){
 		c.moveToPosition(position);
-		ITodoItem item = new Item(c.getString(1),new Date(c.getLong(2)));
+		ITodoItem item = new TodoItem(c.getString(1),new Date(c.getLong(2)));
 		return item;
 	}
 	@Override
@@ -49,7 +47,7 @@ public class ToDoListAdapter extends SimpleCursorAdapter {
 	        Date dueDate = new Date (c.getLong(2));
 	        title.setText(c.getString(1));
 
-		if (c.getLong(1) == -1) { 
+		if (c.getLong(2) == -1) { 
 			date.setText("No due date");
 			date.setTextColor(Color.BLACK);
 			title.setTextColor(Color.BLACK);

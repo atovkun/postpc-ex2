@@ -9,14 +9,11 @@
 
     <ListView
         android:id="@+id/lstTodoItems"
-       android:layout_width="256dp"
-        android:layout_height="match_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
         android:choiceMode="singleChoice" 
-        android:listSelector="@android:color/darker_gray" 
-        android:background="@drawable/border_ui"
+        android:listSelector="@drawable/list_selector"
         android:divider="#00000000" >
     </ListView>
 

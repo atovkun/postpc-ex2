@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+  <PreferenceCategory
+   android:summary="Twitter Settings"
+   android:title="@string/twitterSettings" >
+  <EditTextPreference
+     android:key="hashtag"
+     android:summary="Please enter Twitter hashtag used for automatically creating new tasks"
+     android:title="@string/twitterHashtags"
+      />
+  </PreferenceCategory>
+</PreferenceScreen>
