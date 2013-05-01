@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menuItemAdd"
+        android:title="@string/menuItemAdd"
+        android:icon="@drawable/add"/>
+
+
+    <item
+        android:id="@+id/menuItemShowPref"
+        android:title="@string/menuItemShowPref"/>
+
+
+</menu>
